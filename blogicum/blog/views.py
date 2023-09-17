@@ -1,14 +1,16 @@
 from django.db.models import QuerySet
 from django.http import HttpResponse
+from django.core.paginator import Paginator
 from django.shortcuts import get_list_or_404, get_object_or_404, render
 from django.utils import timezone
-from django.views.generic import DetailView
+from django.views.generic import DetailView  # , UpdateView
 
 from blog.models import Category, Post
 
 from .models import User
 
-TRUNCATE_STRING_TO = 5
+# TRUNCATE_LIST_TO = 5
+PAGINATE_BY_THIS = 10
 
 
 def posts_selected() -> QuerySet:
@@ -40,6 +42,25 @@ class UserDetailView(DetailView):
     slug_url_kwarg = 'username'
     slug_field = 'username'
     context_object_name = 'profile'
+    paginate_by = PAGINATE_BY_THIS
+
+
+def UserUpdateView(request) -> HttpResponse:
+    """ """
+    # model = User
+    template_name = 'blog/user.html'
+    # slug_url_kwarg = 'username'
+    # slug_field = 'username'
+    context = {
+        'form': None,  # user_update_form,
+        }
+    return render(request, template_name, context)
+
+
+def CreatePostView(request) -> HttpResponse:
+    """"""
+    context = {}
+    return render(request, 'blog/create.html', context)
 
 
 def index(request) -> HttpResponse:
@@ -48,8 +69,14 @@ def index(request) -> HttpResponse:
         is_published=True,
         category__is_published=True,
         pub_date__lte=timezone.now()).order_by(
-            '-pub_date')[:TRUNCATE_STRING_TO]
-    context = {'post_list': posts, }
+            '-pub_date')  # [:TRUNCATE_LIST_TO]
+    paginator = Paginator(posts, PAGINATE_BY_THIS)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    context = {
+        'post_list': posts,
+        'page_obj': page_obj,
+        }
     return render(request, 'blog/index.html', context)
 
 

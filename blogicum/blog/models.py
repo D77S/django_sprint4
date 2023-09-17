@@ -6,6 +6,9 @@ User = get_user_model()
 
 
 class TitleModel(models.Model):
+    """Класс абстрактной модели,
+    содержит только лишь поле заголовка.
+    """
     title = models.CharField(
         blank=False,
         max_length=256,
@@ -19,6 +22,11 @@ class TitleModel(models.Model):
 
 
 class Category(PublishedCreatedModel, TitleModel):
+    """Класс модели категории публикации,
+    унаследован(-а) от абстрактов
+    класса опубликованной модели и
+    класса заголовка.
+    """
     description = models.TextField(
         blank=False,
         default='Empty',
@@ -42,6 +50,10 @@ class Category(PublishedCreatedModel, TitleModel):
 
 
 class Location(PublishedCreatedModel):
+    """Класс модели локации публикации,
+    унаследован(-а) от абстракта
+    класса опубликованной модели.
+    """
     name = models.CharField(
         blank=False,
         default='Empty',
@@ -59,6 +71,11 @@ class Location(PublishedCreatedModel):
 
 
 class Post(PublishedCreatedModel, TitleModel):
+    """Класс модели поста (постов),
+    унаследован(-а) от абстрактов
+    класса опубликованной модели и
+    класса заголовка.
+    """
     text = models.TextField(
         blank=False,
         default='Empty',
@@ -102,3 +119,38 @@ class Post(PublishedCreatedModel, TitleModel):
     def __str__(self):
         return self.title if len(str(self.title)) < 30 \
             else str(self.title)[:30] + '...'
+
+
+class UserUpdate(models.Model):
+    """Класс модели для генерации формы
+    для страницы редактирования профиля юзера.
+    Ему будет разрешено редактировать:
+    - имя,
+    - фамилию,
+    - логин,
+    - емейл.
+    """
+    first_name = models.CharField(
+        'Имя',
+        blank=False,
+        help_text='Обязательное поле. Не более 150 символов.',
+        max_length=150
+        )
+    last_name = models.CharField(
+        'Фамилия',
+        blank=True,
+        help_text='Необязательное поле. Не более 150 символов.',
+        max_length=150
+        )
+    login = models.CharField(
+        'Login',
+        blank=False,
+        help_text='Обязательное поле. Не более 150 символов.',
+        max_length=150
+        )
+    email = models.EmailField(
+        'Email',
+        blank=False,
+        help_text='Обязательное поле. Не более 150 символов.',
+        max_length=150
+        )
