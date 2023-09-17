@@ -1,3 +1,4 @@
+# login admin1, pass admin1
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -8,7 +9,12 @@ SECRET_KEY = 'django-insecure-yiz^q++4ct#5e4s$kv7&9-(_&6zux*@!q%&p%234rtf%os6!4d
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+CSRF_FAILURE_VIEW = 'pages.views.csrf_failure'
+
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+]
 
 INSTALLED_APPS = [
     'django_bootstrap5',
