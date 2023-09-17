@@ -2,8 +2,11 @@ from django.db.models import QuerySet
 from django.http import HttpResponse
 from django.shortcuts import get_list_or_404, get_object_or_404, render
 from django.utils import timezone
+from django.views.generic import DetailView
 
 from blog.models import Category, Post
+
+from .models import User
 
 TRUNCATE_STRING_TO = 5
 
@@ -17,6 +20,26 @@ def posts_selected() -> QuerySet:
         'category',
         'location',
         'author')
+
+
+class UserDetailView(DetailView):
+    """Класс для CBV,
+    а конкретно для той, которая отображает
+    детализированную информацию об одном
+    конкретном пользователе.
+    Наследован от стандартного DetailView,
+    но переопределяем:
+    - модель, объект которой нам нужен,
+    - имя шаблона показывания,
+    - имя переменной в urls, в которую принят идентификатор объекта модели,
+    - имя поля модели, с которым надо сопоставлять предыдущий, когда он slug,
+    - имя переменной контекста, через которую транспортируем всё в шаблон.
+    """
+    model = User
+    template_name = 'blog/profile.html'
+    slug_url_kwarg = 'username'
+    slug_field = 'username'
+    context_object_name = 'profile'
 
 
 def index(request) -> HttpResponse:

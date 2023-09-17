@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.forms import UserCreationForm
 from django.urls import include, path, reverse_lazy
-from django.views.generic.edit import CreateView
+from django.views.generic import CreateView
 
 handler404 = 'pages.views.page_not_found'
 handler500 = 'pages.views.server_failure'
@@ -9,7 +9,6 @@ handler500 = 'pages.views.server_failure'
 urlpatterns = [
     path('', include('blog.urls')),
     path('admin/', admin.site.urls),
-    path('auth/', include('django.contrib.auth.urls')),
     path(
         'auth/registration/',
         CreateView.as_view(
@@ -19,5 +18,7 @@ urlpatterns = [
         ),
         name='registration',
     ),
+    path('auth/', include('django.contrib.auth.urls')),
+    path('profile/', include('blog.urls')),
     path('pages/', include('pages.urls')),
 ]
