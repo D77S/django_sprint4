@@ -134,10 +134,10 @@ class PostCreateView(CreateView, LoginRequiredMixin):
     и еще от LoginRequiredMixin, так как создавать новый пост
     разрешено только залогиненному юзеру.
     """
-    # model = ???
+    model = Post
     # form_class = ???
     # fields = '__all__'
-    # template_name = '...'
+    template_name = 'blog/create.html'
     success_url = reverse_lazy('blog:profile')
 
     def form_valid(self, form):
@@ -150,7 +150,8 @@ class PostCreateView(CreateView, LoginRequiredMixin):
 class PostDetailView(DetailView):
     """Класс для CBV, которая
     отображает все данные
-    по одному конкретному посту.
+    по одному конкретному посту,
+    включая каменты к нему.
 
     Наследован от стандартного DetailView,
     (??еще не решил, надо ли также наследоваться
@@ -191,6 +192,7 @@ class PostUpdateView(UpdateView):
     # model = ???
     # form_class = ???
     # fields = '__all__'
+
     template_name = 'blog/create_post.html'  # Да. Именно этот.
     # Тот же, что и для создания поста.
 
@@ -199,7 +201,7 @@ class PostUpdateView(UpdateView):
     # на страницу просмотра поста.
     # После окончания редактирования пользователь должен переадресовываться
     # на страницу отредактированной публикации.
-    # success_url = reverse_lazy('birthday:list')
+    success_url = reverse_lazy('blog:post_detail')
 
 
 class PostDeleteView(DeleteView, LoginRequiredMixin):
@@ -216,7 +218,10 @@ class PostDeleteView(DeleteView, LoginRequiredMixin):
     # model = ???
     # form_class = ???
     # fields = '__all__'
-    # template_name = '...'
+
+    template_name = 'blog/create_post.html'  # Да. Именно этот.
+    # Тот же, что и для создания поста.
+
     success_url = reverse_lazy('blog:profile')
 
 
@@ -230,7 +235,7 @@ class CommentCreateView(CreateView, LoginRequiredMixin):
     """
     # model = ???
     # fields = '__all__'
-    # template_name = '...'
+    template_name = 'includes/comments.html'
     # Подумаем, куда потом перенаправлять юзера после создания.
     # success_url = reverse_lazy('blog:profile')
 
