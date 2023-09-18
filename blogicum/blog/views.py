@@ -5,7 +5,7 @@ from django.core.paginator import Paginator
 from django.shortcuts import get_list_or_404, get_object_or_404, render
 from django.urls import reverse_lazy
 from django.utils import timezone
-from django.views.generic import CreateView, DetailView, UpdateView
+from django.views.generic import CreateView, DeleteView, DetailView, UpdateView
 
 from blog.models import Category, Post
 
@@ -188,3 +188,79 @@ class PostUpdateView(UpdateView):
     # После окончания редактирования пользователь должен переадресовываться
     # на страницу отредактированной публикации.
     # success_url = reverse_lazy('birthday:list')
+
+
+class PostDeleteView(DeleteView, LoginRequiredMixin):
+    """Класс для CBV, которая
+    удаляет пост залогиненного юзера.
+
+    Наследован от стандартного DeleteView,
+    и еще от LoginRequiredMixin, так как удалить пост
+    разрешено только залогиненному юзеру.
+
+    Перед удалением поста должна открываться
+    подтверждающая страница, содержащая удаляемый пост.
+    """
+    # model = ???
+    # form_class = ???
+    # fields = '__all__'
+    # template_name = '...'
+    success_url = reverse_lazy('blog:profile')
+
+
+class CommentCreateView(CreateView, LoginRequiredMixin):
+    """Класс для CBV, которая
+    создает комментарий залогиненного юзера.
+
+    Наследован от стандартного CreateView,
+    и еще от LoginRequiredMixin, так как создать камент
+    разрешено только залогиненному юзеру.
+    """
+    # model = ???
+    # fields = '__all__'
+    # template_name = '...'
+    # Подумаем, куда потом перенаправлять юзера после создания.
+    # success_url = reverse_lazy('blog:profile')
+
+
+class CommentUpdateView(UpdateView, LoginRequiredMixin):
+    """Класс для CBV, которая
+    редактирует комментарий залогиненного юзера.
+
+    Наследован от стандартного UpdateView,
+    и еще от LoginRequiredMixin, так как редактировать камент
+    разрешено только залогиненному юзеру.
+    """
+    model = Comment
+    form_class = CommentForm
+    # fields = '__all__'
+    template_name = 'blog/comment.html'
+    # Подумаем, куда потом перенаправлять юзера после создания.
+
+    def dispatch(self, request, *args, **kwargs):
+        instance = get_object_or_404(Comment, pk=kwargs['comment_pk'])
+        if instance.author != request.user:
+            raise PermissionError
+        return super().dispatch(request, *args, **kwargs)
+
+
+class CommentDeleteView(DeleteView, LoginRequiredMixin):
+    """Класс для CBV, которая
+    удаляет комментарий залогиненного юзера.
+
+    Наследован от стандартного DeleteView,
+    и еще от LoginRequiredMixin, так как удалять камент
+    разрешено только залогиненному юзеру.
+    """
+    model = Comment
+    form_class = CommentForm
+    # fields = '__all__'
+    template_name = 'blog/comment.html'
+    # Подумаем, куда потом перенаправлять юзера после создания.
+    success_url = reverse_lazy('blog:post_detail')
+
+    def dispatch(self, request, *args, **kwargs):
+        instance = get_object_or_404(Comment, pk=kwargs['comment_pk'])
+        if instance.author != request.user:
+            raise PermissionError
+        return super().dispatch(request, *args, **kwargs)
