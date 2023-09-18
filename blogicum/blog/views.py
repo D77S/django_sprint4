@@ -7,9 +7,10 @@ from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views.generic import CreateView, DeleteView, DetailView, UpdateView
 
-from blog.models import Category, Post
+from blog.models import Category, Post, Comment
 
 from .models import User
+from .forms import CommentForm
 
 # TRUNCATE_LIST_TO = 5
 PAGINATE_BY_THIS = 10
@@ -115,7 +116,8 @@ class UserUpdateView(UpdateView, LoginRequiredMixin):
     и еще от LoginRequiredMixin, так как апдейтить профиль (свой!)
     разрешено только залогиненному юзеру.
     """
-    # model = User
+    model = User
+    fields = 'first_name', 'last_name', 'login', 'email'
     template_name = 'blog/user.html'
     # slug_url_kwarg = 'username'
     # slug_field = 'username'
@@ -167,17 +169,17 @@ class PostDetailView(DetailView):
                                            is_published=True,
                                            category__is_published=True)
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['form'] = CommentForm
-        context['comments'] = self.object.select_related('author')
-        return context
-
     # posts = posts_selected().filter(
     #    pk=id, is_published=True,
     #    category__is_published=True)
     # post = get_object_or_404(posts, pub_date__lte=timezone.now())
     # context = {'post': post}
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = CommentForm
+        context['comments'] = self.object.select_related('author')
+        return context
 
 
 class PostUpdateView(UpdateView):
@@ -247,7 +249,7 @@ class CommentUpdateView(UpdateView, LoginRequiredMixin):
     template_name = 'blog/comment.html'
     # Подумаем, куда потом перенаправлять юзера после создания.
 
-    # pk_url_kwarg: The name of the URLConf keyword 
+    # pk_url_kwarg: The name of the URLConf keyword
     # argument that contains the primary key.
     # By default, pk_url_kwarg is 'pk'.
 

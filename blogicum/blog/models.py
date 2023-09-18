@@ -121,6 +121,15 @@ class Post(PublishedCreatedModel, TitleModel):
             else str(self.title)[:30] + '...'
 
 
+class Comment(models.Model):
+    comment = models.CharField(
+        'Комментарий',
+        blank=False,
+        help_text='Комментарий',
+        max_length=150
+        )
+
+
 class UserUpdate(models.Model):
     """Класс модели для генерации формы
     для страницы редактирования профиля юзера.
