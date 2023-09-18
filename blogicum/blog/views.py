@@ -124,7 +124,7 @@ class UserUpdateView(UpdateView, LoginRequiredMixin):
     #    }
 
 
-class CreatePostView(CreateView, LoginRequiredMixin):
+class PostCreateView(CreateView, LoginRequiredMixin):
     """Класс для CBV, которая
     создает новый пост залогиненного юзера.
 
@@ -156,6 +156,16 @@ class PostDetailView(DetailView):
     """
     template_name = 'blog/detail.html'
     model = Post
+
+    # тест проверяет обращение к странице неопубликованного поста от
+    # пользователя-не автора. Ожидает ошибку 404 - страница не найдена.
+    def get_object(self, queryset=None):
+        self.object = super().get_object()
+        if not self.request.user == self.object.author:
+            self.object = Post.objects.get(pk=self.kwargs['pk'],
+                                           pub_date__lte=timezone.now(),
+                                           is_published=True,
+                                           category__is_published=True)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -236,6 +246,10 @@ class CommentUpdateView(UpdateView, LoginRequiredMixin):
     # fields = '__all__'
     template_name = 'blog/comment.html'
     # Подумаем, куда потом перенаправлять юзера после создания.
+
+    # pk_url_kwarg: The name of the URLConf keyword 
+    # argument that contains the primary key.
+    # By default, pk_url_kwarg is 'pk'.
 
     def dispatch(self, request, *args, **kwargs):
         instance = get_object_or_404(Comment, pk=kwargs['comment_pk'])

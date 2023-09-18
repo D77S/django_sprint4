@@ -33,7 +33,7 @@ urlpatterns = [
     # вообще без аттритбутов
     # {% url 'blog:create_post' %}
     # (??наверное, надо будет потом запросить - кто залогинен сейчас??)
-    path('posts/create/', views.CreatePostView.as_view(), name='create_post'),
+    path('posts/create/', views.PostCreateView.as_view(), name='create_post'),
 
     # путь для просмотра поста
     # из шаблона он должен вызываться
