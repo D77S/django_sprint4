@@ -3,8 +3,9 @@ from django.http import HttpResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
 from django.shortcuts import get_list_or_404, get_object_or_404, render
+from django.urls import reverse_lazy
 from django.utils import timezone
-from django.views.generic import CreateView, DetailView  # , UpdateView
+from django.views.generic import CreateView, DetailView, UpdateView
 
 from blog.models import Category, Post
 
@@ -25,11 +26,49 @@ def posts_selected() -> QuerySet:
         'author')
 
 
+def index(request) -> HttpResponse:
+    """
+    Функция для отображения главной страницы."""
+    posts = posts_selected().filter(
+        is_published=True,
+        category__is_published=True,
+        pub_date__lte=timezone.now()).order_by(
+            '-pub_date')  # [:TRUNCATE_LIST_TO]
+    paginator = Paginator(posts, PAGINATE_BY_THIS)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    context = {
+        'post_list': posts,
+        'page_obj': page_obj,
+        }
+    return render(request, 'blog/index.html', context)
+
+
+def category_posts(request, category_slug: str) -> HttpResponse:
+    """Функция для отображения всех постов одной из категорий,
+    принимает request и
+    слаг той категории, все посты которой надо отобразить,
+    возвращает отрендеренную страницу (все посты заданной категории).
+    """
+    posts_or_404 = get_list_or_404(
+        posts_selected().filter(
+            category__slug=category_slug,
+            category__is_published=True,
+            pub_date__lte=timezone.now()).order_by(
+                '-pub_date'), is_published=True)
+    selected_category_or_404 = get_object_or_404(
+        Category.objects.all(),
+        slug=category_slug)
+    context = {'post_list': posts_or_404,
+               'category': selected_category_or_404
+               }
+    return render(request, 'blog/category.html', context)
+
+
 class UserDetailView(DetailView):
-    """Класс для CBV,
-    а конкретно для той, которая отображает
-    детализированную информацию об одном
-    конкретном пользователе.
+    """Класс для CBV, которая
+    отображает детализированную информацию
+    об одном конкретном пользователе.
 
     Должно отображаться:
     - информация о пользователе (доступна всем посетителям),
@@ -47,6 +86,10 @@ class UserDetailView(DetailView):
     - имя переменной в urls, в которую принят идентификатор объекта модели,
     - имя поля модели, с которым надо сопоставлять предыдущий, когда он slug,
     - имя переменной контекста, через которую транспортируем всё в шаблон.
+
+    А вот наследоваться от LoginRequiredMixin НЕ НАДО,
+    так как часть информации должна быть видна
+    и незалогинненному юзеру.
     """
     model = User
     template_name = 'blog/profile.html'
@@ -55,7 +98,7 @@ class UserDetailView(DetailView):
     context_object_name = 'profile'
     # еще надо чтобы выводился список всех постов данного
     # (залогинившегося) юзера
-    # видимо, надо апдейтить контекст(???)
+    # ??наверное, надо апдейтить контекст??
     # эти публикации потом в шаблоне будут извлекаться, после пагинатора,
     # командой {% for post in page_obj %}
     # т.е. их, наверное, надо приапдейтить к контексту под ключом post(???)
@@ -64,21 +107,25 @@ class UserDetailView(DetailView):
     paginate_by = PAGINATE_BY_THIS
 
 
-def UserUpdateView(request) -> HttpResponse:
-    """ """
+class UserUpdateView(UpdateView, LoginRequiredMixin):
+    """Класс для CBV, которая
+    апдейтит профиль залогиненного юзера.
+
+    Наследован от стандартного UpdateView,
+    и еще от LoginRequiredMixin, так как апдейтить профиль (свой!)
+    разрешено только залогиненному юзеру.
+    """
     # model = User
     template_name = 'blog/user.html'
     # slug_url_kwarg = 'username'
     # slug_field = 'username'
-    context = {
-        'form': None,  # user_update_form,
-        }
-    return render(request, template_name, context)
+    # context = {
+    #    'form': None,  # user_update_form,
+    #    }
 
 
 class CreatePostView(CreateView, LoginRequiredMixin):
-    """Класс для CBV,
-    а конкретно для той, которая
+    """Класс для CBV, которая
     создает новый пост залогиненного юзера.
 
     Наследован от стандартного DetailView,
@@ -87,6 +134,9 @@ class CreatePostView(CreateView, LoginRequiredMixin):
     """
     # model = ???
     # form_class = ???
+    # fields = '__all__'
+    # template_name = '...'
+    success_url = reverse_lazy('blog:profile')
 
     def form_valid(self, form):
         # Присвоить полю "имя автора" - объект пользователя из запроса.
@@ -95,54 +145,46 @@ class CreatePostView(CreateView, LoginRequiredMixin):
         return super().form_valid(form)
 
 
-def index(request) -> HttpResponse:
-    """Функция для отображения главной страницы."""
-    posts = posts_selected().filter(
-        is_published=True,
-        category__is_published=True,
-        pub_date__lte=timezone.now()).order_by(
-            '-pub_date')  # [:TRUNCATE_LIST_TO]
-    paginator = Paginator(posts, PAGINATE_BY_THIS)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    context = {
-        'post_list': posts,
-        'page_obj': page_obj,
-        }
-    return render(request, 'blog/index.html', context)
+class PostDetailView(DetailView):
+    """Класс для CBV, которая
+    отображает все данные
+    по одному конкретному посту.
 
-
-def post_detail(request, id: int) -> HttpResponse:
-    """Функция для отображения всех данных
-    по одному конкретному посту,
-    принимает стандартное заклинание request и
-    номер того поста, данные по которому надо отобразить,
-    возвращает отрендеренную страницу (пост детально).
+    Наследован от стандартного DetailView,
+    (??еще не решил, надо ли также наследоваться
+    от LoginRequiredMixin. Наверное всё же нет.??).
     """
-    posts = posts_selected().filter(
-        pk=id, is_published=True,
-        category__is_published=True)
-    post = get_object_or_404(posts, pub_date__lte=timezone.now())
-    context = {'post': post}
-    return render(request, 'blog/detail.html', context)
+    template_name = 'blog/detail.html'
+    model = Post
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = CommentForm
+        context['comments'] = self.object.select_related('author')
+        return context
+
+    # posts = posts_selected().filter(
+    #    pk=id, is_published=True,
+    #    category__is_published=True)
+    # post = get_object_or_404(posts, pub_date__lte=timezone.now())
+    # context = {'post': post}
 
 
-def category_posts(request, category_slug: str) -> HttpResponse:
-    """Функция для отображения всех постов одной из категорий,
-    принимает стандартное заклинание request и
-    слаг той категории, все посты которой надо отобразить,
-    возвращает отрендеренную страницу (все посты заданной категории).
+class PostUpdateView(UpdateView):
+    """Класс для CBV, которая
+    редактирует пост, если залогинен его автор.
+
+    Наследован от стандартного UpdateView.
     """
-    posts_or_404 = get_list_or_404(
-        posts_selected().filter(
-            category__slug=category_slug,
-            category__is_published=True,
-            pub_date__lte=timezone.now()).order_by(
-                '-pub_date'), is_published=True)
-    selected_category_or_404 = get_object_or_404(
-        Category.objects.all(),
-        slug=category_slug)
-    context = {'post_list': posts_or_404,
-               'category': selected_category_or_404
-               }
-    return render(request, 'blog/category.html', context)
+    # model = ???
+    # form_class = ???
+    # fields = '__all__'
+    template_name = 'blog/create_post.html'  # Да. Именно этот.
+    # Тот же, что и для создания поста.
+
+    # Права на редактирование должны быть только у автора публикации.
+    # Остальные пользователи должны перенаправляться
+    # на страницу просмотра поста.
+    # После окончания редактирования пользователь должен переадресовываться
+    # на страницу отредактированной публикации.
+    # success_url = reverse_lazy('birthday:list')

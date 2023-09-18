@@ -25,7 +25,7 @@ urlpatterns = [
     # вообще без атрибутов
     # {% url 'blog:edit_profile' %}
     # (??наверное, надо будет потом запросить - кто залогинен сейчас??)
-    path('edit_profile/', views.UserUpdateView, name='edit_profile'),
+    path('edit_profile/', views.UserUpdateView.as_view(), name='edit_profile'),
 
     # путь для создания поста
     # из шаблона он должен вызываться
