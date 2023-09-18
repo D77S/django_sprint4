@@ -1,9 +1,10 @@
 from django.db.models import QuerySet
 from django.http import HttpResponse
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
 from django.shortcuts import get_list_or_404, get_object_or_404, render
 from django.utils import timezone
-from django.views.generic import DetailView  # , UpdateView
+from django.views.generic import CreateView, DetailView  # , UpdateView
 
 from blog.models import Category, Post
 
@@ -29,6 +30,16 @@ class UserDetailView(DetailView):
     а конкретно для той, которая отображает
     детализированную информацию об одном
     конкретном пользователе.
+
+    Должно отображаться:
+    - информация о пользователе (доступна всем посетителям),
+    - публикации пользователя (доступны всем посетителям),
+    - ссылка на страницу редактирования профиля для изменения имени,
+    фамилии, логина и адреса электронной почты (доступна только залогиненному
+    пользователю — хозяину аккаунта),
+    - ссылка на страницу изменения пароля (доступна только
+    залогиненному пользователю — хозяину аккаунта).
+
     Наследован от стандартного DetailView,
     но переопределяем:
     - модель, объект которой нам нужен,
@@ -42,6 +53,14 @@ class UserDetailView(DetailView):
     slug_url_kwarg = 'username'
     slug_field = 'username'
     context_object_name = 'profile'
+    # еще надо чтобы выводился список всех постов данного
+    # (залогинившегося) юзера
+    # видимо, надо апдейтить контекст(???)
+    # эти публикации потом в шаблоне будут извлекаться, после пагинатора,
+    # командой {% for post in page_obj %}
+    # т.е. их, наверное, надо приапдейтить к контексту под ключом post(???)
+
+    # и ещё их надо пагинировать по 10 штук
     paginate_by = PAGINATE_BY_THIS
 
 
@@ -57,10 +76,23 @@ def UserUpdateView(request) -> HttpResponse:
     return render(request, template_name, context)
 
 
-def CreatePostView(request) -> HttpResponse:
-    """"""
-    context = {}
-    return render(request, 'blog/create.html', context)
+class CreatePostView(CreateView, LoginRequiredMixin):
+    """Класс для CBV,
+    а конкретно для той, которая
+    создает новый пост залогиненного юзера.
+
+    Наследован от стандартного DetailView,
+    и еще от LoginRequiredMixin, так как создавать новый пост
+    разрешено только залогиненному юзеру.
+    """
+    # model = ???
+    # form_class = ???
+
+    def form_valid(self, form):
+        # Присвоить полю "имя автора" - объект пользователя из запроса.
+        form.instance.author = self.request.user
+        # Продолжить валидацию, описанную в форме.
+        return super().form_valid(form)
 
 
 def index(request) -> HttpResponse:
