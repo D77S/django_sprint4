@@ -1,5 +1,6 @@
 from django import forms
-from .models import UserUpdate, Comment
+
+from .models import Comment, UserUpdate
 
 
 class UserUpdateForm(forms.ModelForm):
@@ -17,4 +18,4 @@ class CommentForm(forms.ModelForm):
         # Указываем модель, на основе которой должна строиться форма.
         model = Comment
         # Указываем, что надо отобразить все поля.
-        fields = '__all__'
+        fields = ('text',)

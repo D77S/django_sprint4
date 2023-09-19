@@ -1,6 +1,7 @@
 from core.models import PublishedCreatedModel
 from django.contrib.auth import get_user_model
 from django.db import models
+# from django.utils import timezone
 
 User = get_user_model()
 
@@ -122,12 +123,26 @@ class Post(PublishedCreatedModel, TitleModel):
 
 
 class Comment(models.Model):
-    comment = models.CharField(
+    text = models.TextField(
         'Комментарий',
         blank=False,
         help_text='Комментарий',
         max_length=150
         )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name='Автор комментария'
+    )
+    post = models.ForeignKey(
+        Post,
+        on_delete=models.CASCADE,
+        related_name='comments'
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата и время публикации комментария'
+    )
 
 
 class UserUpdate(models.Model):

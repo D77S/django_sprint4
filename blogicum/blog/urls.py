@@ -6,9 +6,9 @@ from . import views
 app_name = 'blog'
 
 urlpatterns = [
-    path('', views.index, name='index'),
+    path('', views.IndexView.as_view(), name='index'),
     path('category/<slug:category_slug>/',
-         views.category_posts, name='category_posts'),
+         views.CategoryView.as_view(), name='category_posts'),
 
     # путь для просмотра профиля пользователя
     # из шаблона он должен вызываться
