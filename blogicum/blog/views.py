@@ -44,11 +44,10 @@ def posts_selected() -> QuerySet:
     сортировка по дате публикации,
     с присоединенным полем счетчика каментов."""
     return posts_just_selected().filter(
-                is_published=True,
-                category__is_published=True,
-                pub_date__lte=timezone.now()
-                ).annotate(
-                    comment_count=Count('comments'))
+        is_published=True,
+        category__is_published=True,
+        pub_date__lte=timezone.now()
+    ).annotate(comment_count=Count('comments'))
 
 
 def posts_selected_with_unpublished_and_future() -> QuerySet:
@@ -167,8 +166,9 @@ class UserDetailView(PaginateMixin, ListView):
     context_object_name = 'profile'
 
     def get_queryset(self) -> QuerySet:
-        return posts_selected_with_unpublished_and_future(
+        return (posts_selected_with_unpublished_and_future(
             ).filter(author=author_selected(self))
+        )
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
