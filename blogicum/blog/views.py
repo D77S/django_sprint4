@@ -166,8 +166,8 @@ class UserDetailView(PaginateMixin, ListView):
     context_object_name = 'profile'
 
     def get_queryset(self) -> QuerySet:
-        return (posts_selected_with_unpublished_and_future(
-            ).filter(author=author_selected(self))
+        return posts_selected_with_unpublished_and_future().filter(
+            author=author_selected(self)
         )
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
