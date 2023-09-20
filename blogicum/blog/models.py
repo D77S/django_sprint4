@@ -1,12 +1,12 @@
-from core.models import PublishedCreatedModel
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils import timezone
 
+from core.models import PublishedCreatedModel
+
 User = get_user_model()
 
-
-UPLOAD_DIR = 'posts_pics/'
+UPLOAD_DIR = 'posts_pics/'  # А сюда хотим грузить фотки юзеров потом.
 
 
 class TitleModel(models.Model):
@@ -26,7 +26,7 @@ class TitleModel(models.Model):
 
 class Category(PublishedCreatedModel, TitleModel):
     """Класс модели категории публикации,
-    унаследован(-а) от абстрактов
+    унаследован от абстрактов
     класса опубликованной модели и
     класса заголовка.
     """
@@ -54,7 +54,7 @@ class Category(PublishedCreatedModel, TitleModel):
 
 class Location(PublishedCreatedModel):
     """Класс модели локации публикации,
-    унаследован(-а) от абстракта
+    унаследован от абстракта
     класса опубликованной модели.
     """
     name = models.CharField(
@@ -75,7 +75,7 @@ class Location(PublishedCreatedModel):
 
 class Post(PublishedCreatedModel, TitleModel):
     """Класс модели поста (постов),
-    унаследован(-а) от абстрактов
+    унаследован от абстрактов
     класса опубликованной модели и
     класса заголовка.
     """
@@ -125,6 +125,11 @@ class Post(PublishedCreatedModel, TitleModel):
 
 
 class Comment(models.Model):
+    """Класс модели камента.
+    Отложенной публикации (как у модели постов) - нет.
+    (Поля is_published нет.)
+    Публиковать сразу как камент написан.
+    """
     text = models.TextField(
         'Комментарий',
         blank=False,
