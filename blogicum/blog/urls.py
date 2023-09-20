@@ -1,4 +1,3 @@
-# from django.contrib.auth.forms import UserCreationForm
 from django.urls import path
 
 from . import views
@@ -9,7 +8,6 @@ urlpatterns = [
     path('', views.IndexView.as_view(), name='index'),
     path('category/<slug:category_slug>/',
          views.CategoryView.as_view(), name='category_posts'),
-
     # путь для просмотра профиля пользователя
     # из шаблона он должен вызываться
     # по ссылке profile/<username>/
@@ -18,7 +16,6 @@ urlpatterns = [
     # ("имя автора")
     path('profile/<slug:username>/',
          views.UserDetailView.as_view(), name='profile'),
-
     # путь для редактирования профиля пользователя
     # из шаблона он должен вызываться
     # по ссылке (??в задании не задано, сами задаем??)
@@ -26,7 +23,6 @@ urlpatterns = [
     # {% url 'blog:edit_profile' %}
     # (??наверное, надо будет потом запросить - кто залогинен сейчас??)
     path('edit_profile/', views.UserUpdateView.as_view(), name='edit_profile'),
-
     # путь для создания поста
     # из шаблона он должен вызываться
     # по ссылке posts/create/
@@ -34,7 +30,6 @@ urlpatterns = [
     # {% url 'blog:create_post' %}
     # (??наверное, надо будет потом запросить - кто залогинен сейчас??)
     path('posts/create/', views.PostCreateView.as_view(), name='create_post'),
-
     # путь для просмотра поста
     # из шаблона он должен вызываться
     # по ссылке (??в задании не задано, сами задаем??)
@@ -43,7 +38,6 @@ urlpatterns = [
     # (??наверное, надо будет потом запросить - кто залогинен сейчас??)
     path('posts/<int:pk>/',
          views.PostDetailView.as_view(), name='post_detail'),
-
     # путь для редактирования поста
     # из шаблона он должен вызываться
     # по ссылке posts/<post_id>/edit/
@@ -52,7 +46,6 @@ urlpatterns = [
     # ("номер поста для редактирования")
     path('posts/<int:pk>/edit/',
          views.PostUpdateView.as_view(), name='edit_post'),
-
     # путь для удаления поста
     # из шаблона он должен вызываться
     # по ссылке posts/<post_id>/delete/
@@ -62,7 +55,6 @@ urlpatterns = [
     # (??наверное, надо будет потом запросить - кто залогинен сейчас??)
     path('posts/<int:pk>/delete/',
          views.PostDeleteView.as_view(), name='delete_post'),
-
     # путь для создания комментария к посту
     # из шаблона он должен вызываться
     # по ссылке posts/<post_id>/comment/
@@ -72,7 +64,6 @@ urlpatterns = [
     # (??наверное, надо будет потом запросить - кто залогинен сейчас??)
     path('posts/<int:post_pk>/comment/',
          views.CommentCreateView.as_view(), name='add_comment'),
-
     # путь для редактирования комментария к посту
     # из шаблона он должен вызываться
     # по ссылке posts/<post_id>/edit_comment/<comment_id>/
@@ -82,7 +73,6 @@ urlpatterns = [
     # (??наверное, надо будет потом запросить - кто залогинен сейчас??)
     path('posts/<int:post_pk>/edit_comment/<int:comment_pk>/',
          views.CommentUpdateView.as_view(), name='edit_comment'),
-
     # путь для удаления камента к посту
     # из шаблона он должен вызываться
     # по ссылке posts/<post_id>/delete_comment/<comment_id>/

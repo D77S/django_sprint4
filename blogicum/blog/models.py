@@ -1,9 +1,12 @@
 from core.models import PublishedCreatedModel
 from django.contrib.auth import get_user_model
 from django.db import models
-# from django.utils import timezone
+from django.utils import timezone
 
 User = get_user_model()
+
+
+UPLOAD_DIR = 'posts_pics/'
 
 
 class TitleModel(models.Model):
@@ -13,7 +16,6 @@ class TitleModel(models.Model):
     title = models.CharField(
         blank=False,
         max_length=256,
-        default='Empty',
         verbose_name='Заголовок',
         null=True
     )
@@ -79,13 +81,10 @@ class Post(PublishedCreatedModel, TitleModel):
     """
     text = models.TextField(
         blank=False,
-        default='Empty',
         verbose_name='Текст'
     )
     pub_date = models.DateTimeField(
-        blank=False,
-        auto_now_add=False,
-        auto_now=False,
+        default=timezone.now,
         verbose_name='Дата и время публикации',
         help_text='Если установить дату и время в будущем — '
                   'можно делать отложенные публикации.'
@@ -107,10 +106,13 @@ class Post(PublishedCreatedModel, TitleModel):
     )
     category = models.ForeignKey(
         Category,
-        blank=False,
-        null=True,
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
         verbose_name='Категория'
+    )
+    image = models.ImageField(
+        'Картинка',
+        upload_to=UPLOAD_DIR,
+        blank=True
     )
 
     class Meta:
@@ -143,38 +145,3 @@ class Comment(models.Model):
         auto_now_add=True,
         verbose_name='Дата и время публикации комментария'
     )
-
-
-class UserUpdate(models.Model):
-    """Класс модели для генерации формы
-    для страницы редактирования профиля юзера.
-    Ему будет разрешено редактировать:
-    - имя,
-    - фамилию,
-    - логин,
-    - емейл.
-    """
-    first_name = models.CharField(
-        'Имя',
-        blank=False,
-        help_text='Обязательное поле. Не более 150 символов.',
-        max_length=150
-        )
-    last_name = models.CharField(
-        'Фамилия',
-        blank=True,
-        help_text='Необязательное поле. Не более 150 символов.',
-        max_length=150
-        )
-    login = models.CharField(
-        'Login',
-        blank=False,
-        help_text='Обязательное поле. Не более 150 символов.',
-        max_length=150
-        )
-    email = models.EmailField(
-        'Email',
-        blank=False,
-        help_text='Обязательное поле. Не более 150 символов.',
-        max_length=150
-        )

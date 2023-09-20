@@ -4,6 +4,7 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 TEMPLATES_DIR = BASE_DIR / 'templates'
 STATICFILES_DIRS = [BASE_DIR / 'static_dev', ]
+MEDIA_ROOT = BASE_DIR / 'media'
 
 SECRET_KEY = 'django-insecure-yiz^q++4ct#5e4s$kv7&9-(_&6zux*@!q%&p%234rtf%os6!4d'
 
@@ -99,6 +100,5 @@ EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 EMAIL_FILE_PATH = BASE_DIR / 'sent_emails'
 
 LOGIN_REDIRECT_URL = 'blog:index'
-
 
 LOGIN_URL = 'login'

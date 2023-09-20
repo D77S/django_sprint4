@@ -1,20 +1,5 @@
 from django.http import HttpResponse
-
 from django.shortcuts import render
-
-
-def about(request) -> HttpResponse:
-    '''
-    View-функция, возвращает
-    рендер страницы описания ресурса.'''
-    return render(request, 'pages/about.html')
-
-
-def rules(request) -> HttpResponse:
-    '''
-    View-функция, возвращает
-    рендер страницы правил ресурса.'''
-    return render(request, 'pages/rules.html')
 
 
 def page_not_found(request, exception) -> HttpResponse:

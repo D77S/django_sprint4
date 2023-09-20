@@ -1,21 +1,51 @@
 from django import forms
+from django.contrib.auth import get_user_model
+from django.contrib.auth.forms import UserChangeForm
 
-from .models import Comment, UserUpdate
+from blog.models import Comment, Post
 
 
-class UserUpdateForm(forms.ModelForm):
-    # Все настройки задаём в подклассе Meta.
+# Создаем объекта модели юзеров.
+# Как и рекомендуется, запрашиваем его вот такой функцией
+# на случай, если вдруг переопределялась стандартная.
+User = get_user_model()
+
+
+class UserUpdateForm(UserChangeForm):
+    """
+    Форма для апдейта профайла юзера.
+    Ему разрешено апдейтить только:
+    фамилию, имя, username, email."""
     class Meta:
-        # Указываем модель, на основе которой должна строиться форма.
-        model = UserUpdate
-        # Указываем, что надо отобразить все поля.
-        fields = '__all__'
+        model = User
+        fields = ('first_name',
+                  'last_name',
+                  'username',
+                  'email',
+                  )
 
 
 class CommentForm(forms.ModelForm):
-    # Все настройки задаём в подклассе Meta.
+    """
+    Форма для вставки камента.
+    Только сам камент, и всё.
+    Логин коментатора потом подтянем автоматически."""
     class Meta:
-        # Указываем модель, на основе которой должна строиться форма.
         model = Comment
-        # Указываем, что надо отобразить все поля.
         fields = ('text',)
+
+
+class PostForm(forms.ModelForm):
+    """
+    Форма для вставки поста.
+    Почти все поля, кроме автора.
+    (Его потом подтянем автоматически.)"""
+    class Meta:
+        model = Post
+        fields = ('title',
+                  'text',
+                  'image',
+                  'location',
+                  'category',
+                  'pub_date',
+                  )
