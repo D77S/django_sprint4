@@ -135,7 +135,7 @@ class Comment(models.Model):
         blank=False,
         help_text='Комментарий',
         max_length=150
-        )
+    )
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,

@@ -254,9 +254,9 @@ class PostDetailView(DetailView):
         object = get_object_or_404(Post.objects.select_related(
             'category', 'author', 'location'), id=self.kwargs['pk'])
         if (self.request.user == object.author or
-            object.pub_date <= timezone.now() and
-            object.is_published and
-                object.category.is_published):
+           object.pub_date <= timezone.now() and
+           object.is_published and
+           object.category.is_published):
             return object
         raise Http404
 
