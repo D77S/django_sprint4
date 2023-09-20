@@ -85,21 +85,6 @@ class DispatchPostMixin:
         return super().dispatch(request, *args, **kwargs)  # type: ignore
 
 
-class DispatchCommentMixin:
-    """
-    Миксин переопределения диспетчера
-    по проверке на авторство каментов там, где
-    надо убедиться, что на действие претендует автор.
-    """
-    def dispatch(self, request, *args, **kwargs):
-        instance = get_object_or_404(Comment, pk=kwargs['comment_pk'])
-        if instance.author != request.user:
-            return redirect(
-                reverse('blog:post_detail',
-                        kwargs={'pk': self.kwargs['post_pk']}))  # type: ignore
-        return super().dispatch(request, *args, **kwargs)  # type: ignore
-
-
 class IndexView(PaginateMixin, ListView):
     """Класс для CBV, которая
     отображает главную страницу.
@@ -360,6 +345,21 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
         form.instance.author = self.request.user
         form.instance.post = get_object_or_404(Post, id=self.kwargs['post_pk'])
         return super().form_valid(form)
+
+
+class DispatchCommentMixin:
+    """
+    Миксин переопределения диспетчера
+    по проверке на авторство каментов там, где
+    надо убедиться, что на действие претендует автор.
+    """
+    def dispatch(self, request, *args, **kwargs):
+        instance = get_object_or_404(Comment, pk=kwargs['comment_pk'])
+        if instance.author != request.user:
+            return redirect(
+                reverse('blog:post_detail',
+                        kwargs={'pk': self.kwargs['post_pk']}))  # type: ignore
+        return super().dispatch(request, *args, **kwargs)  # type: ignore
 
 
 class CommentUpdateView(DispatchCommentMixin, LoginRequiredMixin, UpdateView):
