@@ -29,10 +29,10 @@ def posts_just_selected() -> QuerySet:
     без фильтрации,
     только сортировка по дате публикации."""
     return Post.objects.select_related(
-               'category',
-               'location',
-               'author'
-               ).order_by('-pub_date')
+        'category',
+        'location',
+        'author'
+    ).order_by('-pub_date')
 
 
 def posts_selected() -> QuerySet:
@@ -253,10 +253,10 @@ class PostDetailView(DetailView):
     def get_object(self, queryset=None) -> Post:
         object = get_object_or_404(Post.objects.select_related(
             'category', 'author', 'location'), id=self.kwargs['pk'])
-        if (self.request.user == object.author or
-           object.pub_date <= timezone.now() and
-           object.is_published and
-           object.category.is_published):
+        if (self.request.user == object.author
+           or object.pub_date <= timezone.now()
+           and object.is_published
+           and object.category.is_published):
             return object
         raise Http404
 
