@@ -15,10 +15,11 @@ from .models import Category, Comment, Post, User
 PAGINATE_BY_THIS = 10
 
 
-def author_selected(self):
+def author_selected(username_required) -> User:
     """
     Возвращает один (нужный) объект модели авторов постов."""
-    return get_object_or_404(User, username=self.kwargs['username'])
+    return get_object_or_404(User, username=username_required)
+    # return get_object_or_404(User, username=self.kwargs['username'])
 
 
 def posts_just_selected() -> QuerySet:
@@ -77,20 +78,6 @@ class DispatchPostMixin:
         return super().dispatch(request, *args, **kwargs)  # type: ignore
 
 
-class DispatchCommentMixin:
-    """
-    Миксин переопределения диспетчера
-    по проверке на авторство каментов там, где
-    надо убедиться, что на действие претендует автор.
-    """
-    def dispatch(self, request, *args, **kwargs):
-        if self.get_object().author != request.user:  # type: ignore
-            return redirect(
-                reverse('blog:post_detail',
-                        kwargs={'pk': self.kwargs['post_pk']}))  # type: ignore
-        return super().dispatch(request, *args, **kwargs)  # type: ignore
-
-
 class IndexView(PaginateMixin, ListView):
     """Класс для CBV, которая
     отображает главную страницу."""
@@ -135,12 +122,12 @@ class UserDetailView(PaginateMixin, ListView):
 
     def get_queryset(self) -> QuerySet:
         return posts_selected_with_unpublished_and_future().filter(
-            author=author_selected(self)
+            author=author_selected(self.kwargs['username'])
         )
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
-        context['profile'] = author_selected(self)
+        context['profile'] = author_selected(self.kwargs['username'])
         return context
 
 
@@ -228,6 +215,20 @@ class PostDeleteView(DispatchPostMixin, LoginRequiredMixin, DeleteView):
         return reverse(
             'blog:profile',
             kwargs={'username': self.request.user.username})  # type: ignore
+
+
+class DispatchCommentMixin:
+    """
+    Миксин переопределения диспетчера
+    по проверке на авторство каментов там, где
+    надо убедиться, что на действие претендует автор.
+    """
+    def dispatch(self, request, *args, **kwargs):
+        if self.get_object().author != request.user:  # type: ignore
+            return redirect(
+                reverse('blog:post_detail',
+                        kwargs={'pk': self.kwargs['post_pk']}))  # type: ignore
+        return super().dispatch(request, *args, **kwargs)  # type: ignore
 
 
 class CommentCreateView(LoginRequiredMixin, CreateView):
