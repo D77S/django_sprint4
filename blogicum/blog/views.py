@@ -354,8 +354,7 @@ class DispatchCommentMixin:
     надо убедиться, что на действие претендует автор.
     """
     def dispatch(self, request, *args, **kwargs):
-        instance = get_object_or_404(Comment, pk=kwargs['comment_pk'])
-        if instance.author != request.user:
+        if self.get_object().author != request.user:
             return redirect(
                 reverse('blog:post_detail',
                         kwargs={'pk': self.kwargs['post_pk']}))  # type: ignore
