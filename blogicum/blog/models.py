@@ -1,10 +1,9 @@
-from django.contrib.auth import get_user_model
+from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
 
 from core.models import PublishedCreatedModel
 
-User = get_user_model()
 
 UPLOAD_DIR = 'posts_pics/'  # А сюда хотим грузить фотки юзеров потом.
 
@@ -24,11 +23,21 @@ class TitleModel(models.Model):
         abstract = True
 
 
-class Category(PublishedCreatedModel, TitleModel):
-    """Класс модели категории публикации,
-    унаследован от абстрактов
-    класса опубликованной модели и
-    класса заголовка.
+class StrModel(models.Model):
+    """Класс абстрактной модели,
+    содержит только лишь переопределение имени объекта.
+    """
+    def __str__(self):
+        if len(str(self.title)) < 30:  # type: ignore
+            return self.title  # type: ignore
+        return str(self.title)[:30] + '...'  # type: ignore
+
+    class Meta:
+        abstract = True
+
+
+class Category(StrModel, PublishedCreatedModel, TitleModel):
+    """Класс модели категории публикации.
     """
     description = models.TextField(
         blank=False,
@@ -47,15 +56,9 @@ class Category(PublishedCreatedModel, TitleModel):
         verbose_name = 'категория'
         verbose_name_plural = 'Категории'
 
-    def __str__(self):
-        return self.title if len(str(self.title)) < 30 \
-            else str(self.title)[:30] + '...'
-
 
 class Location(PublishedCreatedModel):
-    """Класс модели локации публикации,
-    унаследован от абстракта
-    класса опубликованной модели.
+    """Класс модели локации публикации.
     """
     name = models.CharField(
         blank=False,
@@ -68,16 +71,17 @@ class Location(PublishedCreatedModel):
         verbose_name = 'местоположение'
         verbose_name_plural = 'Местоположения'
 
+    # Не можем наследоваться от StrModel, так как
+    # название поля имени не title, а name.
+    # Приведение его тоже к title - слишком радикальная мера,
+    # опасение за падение тестов.
     def __str__(self):
         return self.name if len(str(self.name)) < 30 \
             else str(self.name)[:30] + '...'
 
 
-class Post(PublishedCreatedModel, TitleModel):
-    """Класс модели поста (постов),
-    унаследован от абстрактов
-    класса опубликованной модели и
-    класса заголовка.
+class Post(StrModel, PublishedCreatedModel, TitleModel):
+    """Класс модели поста (постов).
     """
     text = models.TextField(
         blank=False,
@@ -119,16 +123,9 @@ class Post(PublishedCreatedModel, TitleModel):
         verbose_name = 'публикация'
         verbose_name_plural = 'Публикации'
 
-    def __str__(self):
-        return self.title if len(str(self.title)) < 30 \
-            else str(self.title)[:30] + '...'
-
 
 class Comment(models.Model):
     """Класс модели камента.
-    Отложенной публикации (как у модели постов) - нет.
-    (Поля is_published нет.)
-    Публиковать сразу как камент написан.
     """
     text = models.TextField(
         'Комментарий',

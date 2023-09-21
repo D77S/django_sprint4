@@ -1,14 +1,13 @@
 from django import forms
-from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserChangeForm
 
-from blog.models import Comment, Post
+from blog.models import Comment, Post, User
 
 
 # Создаем объекта модели юзеров.
 # Как и рекомендуется, запрашиваем его вот такой функцией
 # на случай, если вдруг переопределялась стандартная.
-User = get_user_model()
+# User = get_user_model()
 
 
 class UserUpdateForm(UserChangeForm):
