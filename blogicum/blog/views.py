@@ -81,6 +81,8 @@ class DispatchPostMixin:
 class IndexView(PaginateMixin, ListView):
     """Класс для CBV, которая
     отображает главную страницу."""
+    # model = Post # если задан get_qweryset, то эта команда лишняя уже
+    # Пагинирование задано подмешиванием миксина пагинирования.
     template_name = 'blog/index.html'
 
     def get_queryset(self) -> QuerySet:
@@ -101,7 +103,8 @@ class CategoryView(PaginateMixin, ListView):
             category=category,
             is_published=True,
             category__is_published=True,
-            pub_date__lte=timezone.now())
+            pub_date__lte=timezone.now()).annotate(
+                comment_count=Count('comments'))
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
